@@ -54,11 +54,11 @@ class TestStormCli(TestCase):
             'storm', 'jar',
             'example/storm-starter/storm-starter-topologies-*.jar',
             'org.apache.storm.starter.RollingTopWords', 'blobstore-remote2',
-            'remote', '--jars',
+            'remote', '-c topology.blobstore.map=\'{"key1":{"localname":"blob_file", "uncompress":false},"key2":{}}\'', '--jars',
             './external/storm-redis/storm-redis-1.1.0.jar,./external/storm-kafka-client/storm-kafka-client-1.1.0.jar"', '--artifacts', '"redis.clients:jedis:2.9.0,org.apache.kafka:kafka-clients:1.0.0^org.slf4j:slf4j-api"', '--artifactRepositories', '"jboss-repository^http://repository.jboss.com/maven2,HDPRepo^http://repo.hortonworks.com/content/groups/public/'
         ], self.mock_execvp, mock.call(
             self.java_cmd, [
-                self.java_cmd, '-client','-Ddaemon.name=', '-Dstorm.options=',
+                self.java_cmd, '-client','-Ddaemon.name=', '-Dstorm.options=+topology.blobstore.map%3D%27%7B%22key1%22%3A%7B%22localname%22%3A%22blob_file%22%2C+%22uncompress%22%3Afalse%7D%2C%22key2%22%3A%7B%7D%7D%27',
                 '-Dstorm.home=' + self.storm_dir + '', '-Dstorm.log.dir=',
                 '-Djava.library.path=', '-Dstorm.conf.file=', '-cp',
                 '' + self.storm_dir + '/*:' + self.storm_dir + '/lib:' + self.storm_dir + '/extlib:example/storm-starter/storm-starter-topologies-*.jar:' + self.storm_dir + '/conf:' + self.storm_dir + '/bin:./external/storm-redis/storm-redis-1.1.0.jar:./external/storm-kafka-client/storm-kafka-client-1.1.0.jar"', '-Dstorm.jar=example/storm-starter/storm-starter-topologies-*.jar', '-Dstorm.dependency.jars=./external/storm-redis/storm-redis-1.1.0.jar,./external/storm-kafka-client/storm-kafka-client-1.1.0.jar"', '-Dstorm.dependency.artifacts={}',
