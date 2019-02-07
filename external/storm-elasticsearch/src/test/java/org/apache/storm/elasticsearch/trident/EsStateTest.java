@@ -25,17 +25,19 @@ import org.apache.storm.elasticsearch.common.DefaultEsTupleMapper;
 import org.apache.storm.elasticsearch.common.EsConfig;
 import org.apache.storm.elasticsearch.common.EsTestUtil;
 import org.apache.storm.testing.IntegrationTest;
+import org.apache.storm.topology.FailedException;
 import org.apache.storm.trident.tuple.TridentTuple;
 import org.elasticsearch.node.Node;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.junit.After;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import org.junit.experimental.categories.Category;
+import org.junit.runner.RunWith;
+import org.mockito.runners.MockitoJUnitRunner;
 
-@IntegrationTest
-@ExtendWith(MockitoExtension.class)
+@Category(IntegrationTest.class)
+@RunWith(MockitoJUnitRunner.class)
 public class EsStateTest {
     
     private static Node node;
@@ -47,18 +49,18 @@ public class EsStateTest {
 
     private EsState state = createEsState();
     
-    @BeforeAll
+    @BeforeClass
     public static void startElasticSearchNode() throws Exception {
         node = EsTestUtil.startEsNode();
         EsTestUtil.ensureEsGreen(node);
     }
 
-    @AfterAll
+    @AfterClass
     public static void closeElasticSearchNode() throws Exception {
         EsTestUtil.stopEsNode(node);
     }
     
-    @AfterEach
+    @After
     public void clearIndex() throws Exception {
         EsTestUtil.clearIndex(node, index);
         EsTestUtil.clearIndex(node, "missing");

@@ -33,14 +33,15 @@ import org.fusesource.mqtt.client.MQTT;
 import org.fusesource.mqtt.client.Message;
 import org.fusesource.mqtt.client.QoS;
 import org.fusesource.mqtt.client.Topic;
+import org.junit.AfterClass;
 import org.junit.Assert;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import org.junit.experimental.categories.Category;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@IntegrationTest
+@Category(IntegrationTest.class)
 public class StormMqttIntegrationTest implements Serializable {
     private static final Logger LOG = LoggerFactory.getLogger(StormMqttIntegrationTest.class);
     private static final String TEST_TOPIC = "/mqtt-topology";
@@ -49,12 +50,12 @@ public class StormMqttIntegrationTest implements Serializable {
     static boolean spoutActivated = false;
     private static BrokerService broker;
 
-    @AfterAll
+    @AfterClass
     public static void cleanup() throws Exception {
         broker.stop();
     }
 
-    @BeforeAll
+    @BeforeClass
     public static void start() throws Exception {
         LOG.warn("Starting broker...");
         broker = new BrokerService();
