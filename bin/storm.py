@@ -632,10 +632,12 @@ def initialize_blobstore_subcommand(subparsers):
     )
     replication_parser.add_argument("KEY")
     replication_parser.add_argument(
-        "--read", action="store_true", help="Used to read the replication factor of the blob"
+        "--read", action="store_true", help="Used to read the replication factor of the blob",
+        default=None
     )
     replication_parser.add_argument(
-        "--update", action="store_true", help=" It is used to update the replication factor of a blob."
+        "--update", action="store_true", help=" It is used to update the replication factor of a blob.",
+        default=None
     )
     replication_parser.add_argument("-r", "--replication-factor", default=None, type=check_positive)
     add_common_options(replication_parser)
