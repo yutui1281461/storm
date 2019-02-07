@@ -600,7 +600,7 @@ def initialize_blobstore_subcommand(subparsers):
         "-a", '--acl', default=None,
         help="ACL is in the form [uo]:[username]:[r-][w-][a-] can be comma separated list."
     )
-    create_parser.add_argument("-r", "--replication-factor", default=None)
+    create_parser.add_argument("-r", "--replication-factor", default=None, type=check_positive)
     add_common_options(create_parser)
 
     update_parser = sub_sub_parsers.add_parser(
@@ -752,7 +752,11 @@ def initialize_rebalance_subcommand(subparsers):
         "rebalance", help=command_help, formatter_class=SortingHelpFormatter
     )
 
-    sub_parser.add_argument("-w", "--wait", default=None)
+    sub_parser.add_argument(
+        "-w", "--wait-time-secs",
+        help="time to wait before starting to rebalance",
+        default=None, type=check_non_negative
+    )
 
     sub_parser.add_argument(
         "-n", "--num-workers", default=None,
@@ -842,7 +846,7 @@ def initialize_admin_subcommand(subparsers):
     )
 
     zk_cli_parser.add_argument(
-        "-t", "--time-out", default=None, help="""Set the timeout to use, defaults to storm
+        "-t", "--time-out", default=None, help="""Set the timeout in seconds to use, defaults to storm
             zookeeper timeout.""", type=check_non_negative
     )
 
