@@ -127,16 +127,6 @@ public class NormalizedResources {
      * Remove the other resources from this. This is the same as subtracting the resources in other from this.
      *
      * @param other the resources we want removed.
-     * @return true if the resources would have gone negative, but were clamped to 0.
-     */
-    public boolean remove(NormalizedResources other) {
-        return this.remove(other, null);
-    }
-
-    /**
-     * Remove the other resources from this. This is the same as subtracting the resources in other from this.
-     *
-     * @param other the resources we want removed.
      * @param resourceMetrics The resource related metrics
      * @return true if the resources would have gone negative, but were clamped to 0.
      */
@@ -145,9 +135,7 @@ public class NormalizedResources {
         this.cpu -= other.cpu;
         if (cpu < 0.0) {
             ret = true;
-            if (resourceMetrics != null) {
-                resourceMetrics.getNegativeResourceEventsMeter().mark();
-            }
+            resourceMetrics.getNegativeResourceEventsMeter().mark();
             cpu = 0.0;
         }
         int otherLength = other.otherResources.length;
@@ -156,9 +144,7 @@ public class NormalizedResources {
             otherResources[i] -= other.otherResources[i];
             if (otherResources[i] < 0.0) {
                 ret = true;
-                if (resourceMetrics != null) {
-                    resourceMetrics.getNegativeResourceEventsMeter().mark();
-                }
+                resourceMetrics.getNegativeResourceEventsMeter().mark();
                 otherResources[i]  = 0.0;
             }
         }
@@ -414,18 +400,5 @@ public class NormalizedResources {
             }
         }
         return cpu > 0;
-    }
-
-    /**
-     * Are any of the resources zero or less.
-     * @return true if any of the resources are zero or less.  False if they are all > 0.
-     */
-    public boolean areAnyZeroOrLess() {
-        for (int i = 0; i < otherResources.length; i++) {
-            if (otherResources[i] <= 0) {
-                return true;
-            }
-        }
-        return cpu <= 0;
     }
 }

@@ -14,8 +14,6 @@ package org.apache.storm.daemon.supervisor;
 
 import java.io.IOException;
 import java.util.Map;
-
-import org.apache.storm.Constants;
 import org.apache.storm.ProcessSimulator;
 import org.apache.storm.daemon.worker.Worker;
 import org.apache.storm.generated.LocalAssignment;
@@ -52,12 +50,7 @@ public class LocalContainer extends Container {
 
     @Override
     public void launch() throws IOException {
-        String numaId = Utils.getNumaIdForPort(_port, _conf);
-        String supervisorId = _supervisorId;
-        if (numaId != null) {
-            supervisorId +=  Constants.NUMA_ID_SEPARATOR + _supervisorId;
-        }
-        Worker worker = new Worker(_conf, _sharedContext, _topologyId, supervisorId, _supervisorPort, _port, _workerId);
+        Worker worker = new Worker(_conf, _sharedContext, _topologyId, _supervisorId, _supervisorPort, _port, _workerId);
         try {
             worker.start();
         } catch (Exception e) {
