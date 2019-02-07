@@ -34,11 +34,6 @@
             <email>ricetons@gmail.com</email>
         </developer>
     </developers>
-    
-    <properties>
-        <!-- Required downgrade by calcite-core 1.14.0 -->
-        <guava.version>16.0.1</guava.version>
-    </properties>
 
     <dependencies>
         <dependency>
@@ -127,11 +122,6 @@
             <artifactId>commons-collections4</artifactId>
             <version>4.1</version>
             <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.google.guava</groupId>
-            <artifactId>guava</artifactId>
-            <version>${guava.version}</version>
         </dependency>
     </dependencies>
     <build>

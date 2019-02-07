@@ -26,11 +26,6 @@
     </parent>
 
     <artifactId>storm-hive-examples</artifactId>
-    
-    <properties>
-        <!-- Required downgrade by hive-common 2.3.3 -->
-        <guava.version>16.0.1</guava.version>
-    </properties>
 
     <dependencies>
         <dependency>
@@ -43,11 +38,6 @@
             <groupId>org.apache.storm</groupId>
             <artifactId>storm-hive</artifactId>
             <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.google.guava</groupId>
-            <artifactId>guava</artifactId>
-            <version>${guava.version}</version>
         </dependency>
     </dependencies>
 

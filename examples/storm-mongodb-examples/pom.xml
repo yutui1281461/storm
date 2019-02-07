@@ -26,11 +26,6 @@
     </parent>
 
     <artifactId>storm-mongodb-examples</artifactId>
-    
-    <properties>
-        <!-- Required downgrade by mongo-java-driver 3.2.0 -->
-        <guava.version>16.0.1</guava.version>
-    </properties>
 
     <dependencies>
         <dependency>
@@ -43,11 +38,6 @@
             <groupId>org.apache.storm</groupId>
             <artifactId>storm-mongodb</artifactId>
             <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.google.guava</groupId>
-            <artifactId>guava</artifactId>
-            <version>${guava.version}</version>
         </dependency>
     </dependencies>
 
