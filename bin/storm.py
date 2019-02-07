@@ -234,15 +234,15 @@ def exec_storm_class(klass, storm_config_opts, jvmtype="-server", jvmopts=[], ex
     if(storm_log_dir == None or storm_log_dir == "null"):
         storm_log_dir = os.path.join(STORM_DIR, "logs")
     all_args = [
-                   JAVA_CMD, jvmtype,
-                   "-Ddaemon.name=" + daemonName,
-                   get_config_opts(storm_config_opts),
-                   "-Dstorm.home=" + STORM_DIR,
-                   "-Dstorm.log.dir=" + storm_log_dir,
-                   "-Djava.library.path=" + confvalue("java.library.path", storm_config_opts, extrajars, daemon=daemon),
-                   "-Dstorm.conf.file=" + CONF_FILE,
-                   "-cp", get_classpath(extrajars, daemon, client=client),
-                   ] + jvmopts + [klass] + list(args)
+        JAVA_CMD, jvmtype,
+        "-Ddaemon.name=" + daemonName,
+        get_config_opts(storm_config_opts),
+       "-Dstorm.home=" + STORM_DIR,
+       "-Dstorm.log.dir=" + storm_log_dir,
+       "-Djava.library.path=" + confvalue("java.library.path", storm_config_opts, extrajars, daemon=daemon),
+       "-Dstorm.conf.file=" + CONF_FILE,
+       "-cp", get_classpath(extrajars, daemon, client=client),
+    ] + jvmopts + [klass] + list(args)
     print("Running: " + " ".join(all_args))
     sys.stdout.flush()
     exit_code = 0
@@ -604,7 +604,7 @@ def initialize_blobstore_subcommand(subparsers):
     add_common_options(create_parser)
 
     update_parser = sub_sub_parsers.add_parser(
-        "update", help="update the contents of a blob.  Contents comes from a FILE or STDIN (requires write access).", formatter_class=SortingHelpFormatter
+        "update", help="update the contents of a blob.  Contents comes from a FILE or STDIN (requires write access).", formatter_class=SortingHelpFormatter,
     )
     update_parser.add_argument("KEY")
     update_parser.add_argument("-f", '--FILE', default=None)
@@ -1121,7 +1121,7 @@ def upload_credentials(args):
 
 
 def blob(args):
-    if args.update and not args.replication_factor:
+    if hasattr(args, "update") and args.update and not args.replication_factor:
         raise argparse.ArgumentTypeError("Replication factor needed when doing blob update")
     exec_storm_class(
         "org.apache.storm.command.Blobstore",
