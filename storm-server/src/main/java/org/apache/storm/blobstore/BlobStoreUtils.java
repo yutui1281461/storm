@@ -49,12 +49,6 @@ public class BlobStoreUtils {
         return BLOBSTORE_SUBTREE;
     }
 
-    /**
-     * createZKClient.
-     * @param conf conf
-     * @param type type
-     * @return zkClient
-     */
     public static CuratorFramework createZKClient(Map<String, Object> conf, DaemonType type) {
         @SuppressWarnings("unchecked")
         List<String> zkServers = (List<String>) conf.get(Config.STORM_ZOOKEEPER_SERVERS);
@@ -67,21 +61,13 @@ public class BlobStoreUtils {
         return zkClient;
     }
 
-    /**
-     * getNimbusSubject.
-     * @return nimbusSubject
-     */
     public static Subject getNimbusSubject() {
         Subject subject = new Subject();
         subject.getPrincipals().add(new NimbusPrincipal());
         return subject;
     }
 
-    /**
-     * Normalize state.
-     * @param nimbusSeqNumberInfo nimbusSeqNumberInfo
-     * @return BlobKeySequenceInfo
-     */
+    // Normalize state
     public static BlobKeySequenceInfo normalizeNimbusHostPortSequenceNumberInfo(String nimbusSeqNumberInfo) {
         BlobKeySequenceInfo keySequenceInfo = new BlobKeySequenceInfo();
         int lastIndex = nimbusSeqNumberInfo.lastIndexOf("-");
@@ -91,15 +77,6 @@ public class BlobStoreUtils {
     }
 
     // Check for latest sequence number of a key inside zookeeper and return nimbodes containing the latest sequence number
-
-    /**
-     * Check for latest sequence number of a key inside zookeeper
-     * and return nimbodes containing the latest sequence number.
-     * @param zkClient zkClient
-     * @param key key
-     * @return NimbusInfo
-     * @throws Exception
-     */
     public static Set<NimbusInfo> getNimbodesWithLatestSequenceNumberOfBlob(CuratorFramework zkClient, String key) throws Exception {
         List<String> stateInfoList;
         try {
@@ -124,11 +101,7 @@ public class BlobStoreUtils {
         return nimbusInfoSet;
     }
 
-    /**
-     * Get sequence number details from latest sequence number of the blob.
-     * @param stateInfoList stateInfoList
-     * @return LatestSequenceNumber
-     */
+    // Get sequence number details from latest sequence number of the blob
     public static int getLatestSequenceNumber(List<String> stateInfoList) {
         int seqNumber = 0;
         // Get latest sequence number of the blob present in the zookeeper --> possible to refactor this piece of code
@@ -144,15 +117,7 @@ public class BlobStoreUtils {
         return seqNumber;
     }
 
-    /**
-     * Download missing blobs from potential nimbodes.
-     * @param conf conf
-     * @param blobStore blobStore
-     * @param key key
-     * @param nimbusInfos nimbusInfos
-     * @return downloadMissingBlob
-     * @throws TTransportException
-     */
+    // Download missing blobs from potential nimbodes
     public static boolean downloadMissingBlob(Map<String, Object> conf, BlobStore blobStore, String key, Set<NimbusInfo> nimbusInfos)
         throws TTransportException {
         ReadableBlobMeta rbm;
@@ -201,15 +166,7 @@ public class BlobStoreUtils {
         return isSuccess;
     }
 
-    /**
-     * Download updated blobs from potential nimbodes.
-     * @param conf conf
-     * @param blobStore blobStore
-     * @param key key
-     * @param nimbusInfos nimbusInfos
-     * @return downloadUpdatedBlob
-     * @throws TTransportException
-     */
+    // Download updated blobs from potential nimbodes
     public static boolean downloadUpdatedBlob(Map<String, Object> conf, BlobStore blobStore, String key, Set<NimbusInfo> nimbusInfos)
         throws TTransportException {
         ClientBlobStore remoteBlobStore;
