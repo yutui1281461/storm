@@ -18,21 +18,14 @@
 
 package org.apache.storm.testing;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Inherited;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
-import org.junit.jupiter.api.Tag;
-
 /**
- * Annotation to mark performance tests. Performance tests will be run if the profile performance-tests or all-tests are enabled.
+ * Marker interface used to mark performance tests. Performance tests will be run if the profile performance-tests or all-tests are enabled.
  * <p/>
  * Performance tests can be in the same package as unit tests. To mark a test as a performance test,
- * add the annotation @PerformanceTest to the class definition.
+ * add the annotation @Category(PerformanceTest.class) to the class definition as well as to its hierarchy of superclasses.
  * For example:
  * <p/>
- * {@literal @}PerformanceTest<br/>
+ * @ Category(PerformanceTest.class)<br/>
  * public class MyPerformanceTest {<br/>
  *  ...<br/>
  * }
@@ -40,9 +33,5 @@ import org.junit.jupiter.api.Tag;
  *  In general performance tests should have a time limit on them, but the time limit should be liberal enough to account
  *  for running on CI systems like travis ci, or the apache jenkins build.
  */
-@Target({ ElementType.TYPE, ElementType.METHOD })
-@Retention(RetentionPolicy.RUNTIME)
-@Inherited
-@Tag("PerformanceTest")
-public @interface PerformanceTest {
+public interface PerformanceTest {
 }

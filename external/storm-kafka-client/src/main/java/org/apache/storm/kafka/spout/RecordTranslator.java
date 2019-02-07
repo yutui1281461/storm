@@ -36,8 +36,7 @@ public interface RecordTranslator<K, V> extends Serializable, Func<ConsumerRecor
      * @param record the record to translate
      * @return the objects in the tuple.  Return a {@link KafkaTuple}
      *     if you want to route the tuple to a non-default stream.
-     *     Return {@code null} to discard an invalid {@link ConsumerRecord}
-     *     if {@link Builder#setEmitNullTuples(boolean)} is set to {@code false}.
+     *     Return null to discard an invalid {@link ConsumerRecord} if {@link Builder#setEmitNullTuples(boolean)} is set to true
      */
     List<Object> apply(ConsumerRecord<K,V> record);
     

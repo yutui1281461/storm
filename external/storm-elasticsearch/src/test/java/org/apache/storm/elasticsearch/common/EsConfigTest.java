@@ -20,16 +20,15 @@ package org.apache.storm.elasticsearch.common;
 import static org.junit.Assert.assertEquals;
 
 import org.apache.http.HttpHost;
+import org.junit.Test;
 
 import com.google.common.testing.NullPointerTester;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
 
 public class EsConfigTest {
 
-    @Test
+    @Test(expected = IllegalArgumentException.class)
     public void urlsCannotBeEmpty() throws Exception {
-        Assertions.assertThrows(IllegalArgumentException.class, () -> new EsConfig(new String[] {}));
+        new EsConfig(new String[] {});
     }
 
     @Test

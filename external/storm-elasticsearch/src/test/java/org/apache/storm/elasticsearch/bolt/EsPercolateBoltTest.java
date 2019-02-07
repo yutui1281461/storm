@@ -27,13 +27,16 @@ import static org.mockito.Mockito.verify;
 import org.apache.storm.elasticsearch.common.EsConfig;
 import org.apache.storm.elasticsearch.common.EsTestUtil;
 import org.apache.storm.elasticsearch.response.PercolateResponse;
+import org.apache.storm.testing.IntegrationTest;
 import org.apache.storm.tuple.Tuple;
 import org.apache.storm.tuple.Values;
 import org.elasticsearch.client.ResponseException;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.experimental.categories.Category;
 import org.mockito.ArgumentCaptor;
 
+@Category(IntegrationTest.class)
 public class EsPercolateBoltTest extends AbstractEsBoltIntegrationTest<EsPercolateBolt> {
 
     private final String source = "{\"user\":\"user1\"}";
@@ -43,7 +46,7 @@ public class EsPercolateBoltTest extends AbstractEsBoltIntegrationTest<EsPercola
         return new EsPercolateBolt(esConfig);
     }
 
-    @BeforeEach
+    @Before
     public void populateIndexWithTestData() throws Exception {
         node.client().prepareIndex(index, ".percolator", documentId)
             .setSource("{\"query\":{\"match\":" + source + "}}")

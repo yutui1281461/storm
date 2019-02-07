@@ -19,11 +19,13 @@ package org.apache.storm.elasticsearch.bolt;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
+import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -35,21 +37,20 @@ import org.apache.storm.elasticsearch.common.EsTupleMapper;
 import org.apache.storm.topology.OutputFieldsDeclarer;
 import org.apache.storm.tuple.Fields;
 import org.apache.storm.tuple.Tuple;
+import org.apache.storm.tuple.Values;
 import org.elasticsearch.action.get.GetRequest;
+import org.elasticsearch.client.Response;
 import org.elasticsearch.client.ResponseException;
 import org.elasticsearch.client.RestClient;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.mockito.junit.jupiter.MockitoSettings;
-import org.mockito.quality.Strictness;
+import org.mockito.runners.MockitoJUnitRunner;
 
-@ExtendWith(MockitoExtension.class)
-@MockitoSettings(strictness = Strictness.WARN)
+@RunWith(MockitoJUnitRunner.class)
 public class EsLookupBoltTest extends AbstractEsBoltTest<EsLookupBolt> {
 
     static final Map<String, String> params = new HashMap<>();
@@ -81,12 +82,12 @@ public class EsLookupBoltTest extends AbstractEsBoltTest<EsLookupBolt> {
         return new EsLookupBolt(esConfig, tupleMapper, output);
     }
 
-    @AfterEach
+    @After
     public void replaceClientWithOriginal() throws Exception {
         EsLookupBolt.replaceClient(originalClient);
     }
 
-    @BeforeEach
+    @Before
     public void configureBoltDependencies() throws Exception {
         when(tupleMapper.getIndex(tuple)).thenReturn(index);
         when(tupleMapper.getType(tuple)).thenReturn(type);
