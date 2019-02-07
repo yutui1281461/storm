@@ -841,7 +841,7 @@ def initialize_admin_subcommand(subparsers):
 
     zk_cli_parser.add_argument(
         "-t", "--time-out", default=None, help="""Set the timeout to use, defaults to storm
-            zookeeper timeout."""
+            zookeeper timeout.""", type=check_non_negative
     )
 
     zk_cli_parser.add_argument(
