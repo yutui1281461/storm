@@ -154,7 +154,7 @@ def init_storm_env():
         print("*" * 20)
         print('''The storm client can only be run from within a release. 
 You appear to be trying to run the client from a checkout of Storm's source code.
-You can download a Storm release at http://storm.apache.org/downloads.html")''')
+You can download a Storm release at https://storm.apache.org/downloads.html")''')
         print("*" * 20)
         sys.exit(1)
 
@@ -295,11 +295,7 @@ def print_remoteconfvalue(args):
 
 def initialize_main_command():
     main_parser = argparse.ArgumentParser(prog="storm", formatter_class=SortingHelpFormatter)
-    main_parser.add_argument("--config", default=None, help="Override default storm conf file")
-    main_parser.add_argument(
-        "-storm_config_opts", metavar="-c", action="append", default=[],
-        help="Override storm conf properties , e.g. nimbus.ui.port=4443"
-    )
+    add_common_options(main_parser)
 
     subparsers = main_parser.add_subparsers(help="")
 
@@ -313,6 +309,7 @@ def initialize_main_command():
     initialize_blobstore_subcommand(subparsers)
     initialize_heartbeats_subcommand(subparsers)
     initialize_activate_subcommand(subparsers)
+    initialize_set_log_level_subcommand(subparsers)
     initialize_listtopos_subcommand(subparsers)
     initialize_deactivate_subcommand(subparsers)
     initialize_rebalance_subcommand(subparsers)
@@ -346,6 +343,8 @@ def initialize_localconfvalue_subcommand(subparsers):
     sub_parser = subparsers.add_parser("localconfvalue", help=command_help, formatter_class=SortingHelpFormatter)
     sub_parser.add_argument("conf_name")
     sub_parser.set_defaults(func=print_localconfvalue)
+    add_common_options(sub_parser)
+
 
 
 def initialize_remoteconfvalue_subcommand(subparsers):
@@ -358,12 +357,29 @@ def initialize_remoteconfvalue_subcommand(subparsers):
     sub_parser = subparsers.add_parser("remoteconfvalue", help=command_help, formatter_class=SortingHelpFormatter)
     sub_parser.add_argument("conf_name")
     sub_parser.set_defaults(func=print_remoteconfvalue)
+    add_common_options(sub_parser)
 
+
+def add_common_options(parser):
+    parser.add_argument("--config", default=None, help="Override default storm conf file")
+    parser.add_argument(
+        "-storm_config_opts", "-c", action="append", default=[],
+        help="Override storm conf properties , e.g. nimbus.ui.port=4443"
+    )
 
 def add_topology_jar_options(parser):
-    parser.add_argument("topology_jar_path", help="will upload the jar at topology-jar-path when the topology is submitted.")
-    parser.add_argument("topology_main_class", help="main class of the topology jar being submitted")
-    parser.add_argument("topology_main_args", nargs='*', help="Runs the main method with the specified arguments.")
+    parser.add_argument(
+        "topology_jar_path", metavar="topology-jar-path",
+        help="will upload the jar at topology-jar-path when the topology is submitted."
+    )
+    parser.add_argument(
+        "topology_main_class", metavar="topology-main-class",
+    help="main class of the topology jar being submitted"
+    )
+    parser.add_argument(
+        "topology_main_args", metavar="topology_main_args",
+        nargs='*', help="Runs the main method with the specified arguments."
+    )
 
 
 def add_client_jar_options(parser):
@@ -399,7 +415,7 @@ def initialize_jar_subcommand(subparsers):
     jar_help = """Runs the main method of class with the specified arguments.
     The storm worker dependencies and configs in ~/.storm are put on the classpath.
     The process is configured so that StormSubmitter
-    (http://storm.apache.org/releases/current/javadocs/org/apache/storm/StormSubmitter.html)
+    (https://storm.apache.org/releases/current/javadocs/org/apache/storm/StormSubmitter.html)
     will upload the jar at topology-jar-path when the topology is submitted.
 
     When you pass jars and/or artifacts options, StormSubmitter will upload them when the topology is submitted, and they will be included to classpath of both the process which runs the class, and also workers for that topology.
@@ -421,13 +437,14 @@ def initialize_jar_subcommand(subparsers):
     )
 
     jar_parser.set_defaults(func=jar)
+    add_common_options(jar_parser)
 
 
 def initialize_local_subcommand(subparsers):
     command_help = """Runs the main method of class with the specified arguments but pointing to a local cluster
     The storm jars and configs in ~/.storm are put on the classpath.
     The process is configured so that StormSubmitter
-    (http://storm.apache.org/releases/current/javadocs/org/apache/storm/StormSubmitter.html)
+    (https://storm.apache.org/releases/current/javadocs/org/apache/storm/StormSubmitter.html)
     and others will interact with a local cluster instead of the one configured by default.
 
     Most options should work just like with the storm jar command.
@@ -450,7 +467,14 @@ def initialize_local_subcommand(subparsers):
         default=None
     )
 
+    sub_parser.add_argument(
+        "--local-zookeeper",
+        help="""if using an external zookeeper sets the connection string to use for it.""",
+        default=None
+    )
+
     sub_parser.set_defaults(func=local)
+    add_common_options(sub_parser)
 
 
 def initialize_kill_subcommand(subparsers):
@@ -467,11 +491,18 @@ def initialize_kill_subcommand(subparsers):
     sub_parser.add_argument(
         "-w", "--wait-time-secs",
         help="""override the length of time Storm waits between deactivation and shutdown""",
-        default=None
+        default=None, type=check_non_negative
     )
 
     sub_parser.set_defaults(func=kill)
+    add_common_options(sub_parser)
 
+
+def check_non_negative(value):
+    ivalue = int(value)
+    if ivalue < 0:
+        raise argparse.ArgumentTypeError("%s is not a non-zero integer" % value)
+    return ivalue
 
 def check_positive(value):
     ivalue = int(value)
@@ -507,6 +538,7 @@ def initialize_upload_credentials_subcommand(subparsers):
     )
 
     sub_parser.set_defaults(func=upload_credentials)
+    add_common_options(sub_parser)
 
 
 def initialize_sql_subcommand(subparsers):
@@ -519,12 +551,19 @@ def initialize_sql_subcommand(subparsers):
 
     add_client_jar_options(sub_parser)
 
+
     sub_parser.add_argument("sql_file", metavar="sql-file")
-    sub_parser.add_argument(
-        "topology_name", metavar="topology-name", help="should be --explain to activate explain mode"
+
+    group = sub_parser.add_mutually_exclusive_group(required=True)
+
+    group.add_argument(
+        "topology_name", metavar="topology-name",nargs='?'
     )
 
+    group.add_argument("--explain", action="store_true", help="activate explain mode")
+
     sub_parser.set_defaults(func=sql)
+    add_common_options(sub_parser)
 
 
 def initialize_blobstore_subcommand(subparsers):
@@ -541,13 +580,15 @@ def initialize_blobstore_subcommand(subparsers):
         "list", help="lists blobs currently in the blob store", formatter_class=SortingHelpFormatter
     )
     list_parser.add_argument(
-        "keys", nargs='*')
+        "keys", nargs='+')
+    add_common_options(list_parser)
 
     cat_parser = sub_sub_parsers.add_parser(
         "cat", help="read a blob and then either write it to a file, or STDOUT (requires read access).", formatter_class=SortingHelpFormatter
     )
     cat_parser.add_argument("KEY")
     cat_parser.add_argument("-f", '--FILE', default=None)
+    add_common_options(cat_parser)
 
 
     create_parser = sub_sub_parsers.add_parser(
@@ -560,17 +601,20 @@ def initialize_blobstore_subcommand(subparsers):
         help="ACL is in the form [uo]:[username]:[r-][w-][a-] can be comma separated list."
     )
     create_parser.add_argument("-r", "--replication-factor", default=None)
+    add_common_options(create_parser)
 
     update_parser = sub_sub_parsers.add_parser(
         "update", help="update the contents of a blob.  Contents comes from a FILE or STDIN (requires write access).", formatter_class=SortingHelpFormatter
     )
     update_parser.add_argument("KEY")
     update_parser.add_argument("-f", '--FILE', default=None)
+    add_common_options(update_parser)
 
     delete_parser = sub_sub_parsers.add_parser(
         "delete", help="delete an entry from the blob store (requires write access).", formatter_class=SortingHelpFormatter
     )
     delete_parser.add_argument("KEY")
+    add_common_options(delete_parser)
 
     set_acl_parser = sub_sub_parsers.add_parser(
         "set-acl", help="set acls for the given key", formatter_class=SortingHelpFormatter
@@ -581,6 +625,7 @@ def initialize_blobstore_subcommand(subparsers):
         help="""ACL is in the form [uo]:[username]:[r-][w-][a-] 
         can be comma separated list (requires admin access)."""
     )
+    add_common_options(set_acl_parser)
 
     replication_parser = sub_sub_parsers.add_parser(
         "replication", formatter_class=SortingHelpFormatter
@@ -592,9 +637,11 @@ def initialize_blobstore_subcommand(subparsers):
     replication_parser.add_argument(
         "--update", action="store_true", help=" It is used to update the replication factor of a blob."
     )
-    replication_parser.add_argument("-r", "--replication-factor", default=None)
+    replication_parser.add_argument("-r", "--replication-factor", default=None, type=check_positive)
+    add_common_options(replication_parser)
 
     sub_parser.set_defaults(func=blob)
+    add_common_options(sub_parser)
 
 
 def initialize_heartbeats_subcommand(subparsers):
@@ -611,6 +658,7 @@ def initialize_heartbeats_subcommand(subparsers):
     )
     get_parser.add_argument("PATH")
     sub_parser.set_defaults(func=heartbeats)
+    add_common_options(sub_parser)
 
 
 def initialize_activate_subcommand(subparsers):
@@ -621,6 +669,7 @@ def initialize_activate_subcommand(subparsers):
     sub_parser.add_argument("topology-name")
 
     sub_parser.set_defaults(func=activate)
+    add_common_options(sub_parser)
 
 
 def initialize_listtopos_subcommand(subparsers):
@@ -629,6 +678,44 @@ def initialize_listtopos_subcommand(subparsers):
     )
 
     sub_parser.set_defaults(func=listtopos)
+    add_common_options(sub_parser)
+
+
+def initialize_set_log_level_subcommand(subparsers):
+    sub_parser = subparsers.add_parser(
+        "set_log_level", help="""
+        Dynamically change topology log levels
+        e.g.
+        ./bin/storm set_log_level -l ROOT=DEBUG:30 topology-name
+
+        Set the root logger's level to DEBUG for 30 seconds
+
+        ./bin/storm set_log_level -l com.myapp=WARN topology-name
+
+        Set the com.myapp logger's level to WARN for 30 seconds
+
+        ./bin/storm set_log_level -l com.myapp=WARN -l com.myOtherLogger=ERROR:123 topology-name
+
+        Set the com.myapp logger's level to WARN indefinitely, and com.myOtherLogger
+        to ERROR for 123 seconds
+
+        ./bin/storm set_log_level -r com.myOtherLogger topology-name
+
+        Clears settings, resetting back to the original level
+        """, formatter_class=SortingHelpFormatter
+    )
+
+    sub_parser.add_argument("-l", action="append", default=[], help="""
+    -l [logger name]=[log level][:optional timeout] where log level is one of:
+        ALL, TRACE, DEBUG, INFO, WARN, ERROR, FATAL, OFF
+    """)
+    sub_parser.add_argument("-r", action="append", default=[], help="""
+    -r [logger name]
+    """)
+    sub_parser.add_argument("topology-name")
+
+    sub_parser.set_defaults(func=set_log_level)
+    add_common_options(sub_parser)
 
 
 def initialize_deactivate_subcommand(subparsers):
@@ -639,6 +726,7 @@ def initialize_deactivate_subcommand(subparsers):
     sub_parser.add_argument("topology-name")
 
     sub_parser.set_defaults(func=deactivate)
+    add_common_options(sub_parser)
 
 
 def initialize_rebalance_subcommand(subparsers):
@@ -666,12 +754,12 @@ def initialize_rebalance_subcommand(subparsers):
 
     sub_parser.add_argument(
         "-n", "--num-workers", default=None,
-        help="change the number of requested workers"
+        help="change the number of requested workers", type=check_positive
     )
 
     sub_parser.add_argument(
         "-e", "--executors", action="append", default=[],
-        help="change the number of executors for a given component"
+        help="change the number of executors for a given component e.g component_name:5"
     )
 
     sub_parser.add_argument(
@@ -690,6 +778,7 @@ def initialize_rebalance_subcommand(subparsers):
     sub_parser.add_argument("topology-name")
 
     sub_parser.set_defaults(func=rebalance)
+    add_common_options(sub_parser)
 
 
 def initialize_get_errors_subcommand(subparsers):
@@ -702,6 +791,7 @@ def initialize_get_errors_subcommand(subparsers):
     sub_parser.add_argument("topology-name")
 
     sub_parser.set_defaults(func=get_errors)
+    add_common_options(sub_parser)
 
 
 def initialize_healthcheck_subcommand(subparsers):
@@ -710,6 +800,7 @@ def initialize_healthcheck_subcommand(subparsers):
     )
 
     sub_parser.set_defaults(func=healthcheck)
+    add_common_options(sub_parser)
 
 
 def initialize_kill_workers_subcommand(subparsers):
@@ -720,6 +811,7 @@ def initialize_kill_workers_subcommand(subparsers):
     )
 
     sub_parser.set_defaults(func=kill_workers)
+    add_common_options(sub_parser)
 
 
 def initialize_admin_subcommand(subparsers):
@@ -727,12 +819,14 @@ def initialize_admin_subcommand(subparsers):
     an administrator debug or fix a cluster.""", formatter_class=SortingHelpFormatter)
     sub_sub_parsers = sub_parser.add_subparsers()
 
-    sub_sub_parsers.add_parser(
+    remove_sub_sub_parser = sub_sub_parsers.add_parser(
         "remove_corrupt_topologies", help="""This command should be run on a nimbus node as
     the same user nimbus runs as.  It will go directly to zookeeper + blobstore
     and find topologies that appear to be corrupted because of missing blobs.
     It will kill those topologies.""", formatter_class=SortingHelpFormatter
     )
+
+    add_common_options(remove_sub_sub_parser)
 
     zk_cli_parser = sub_sub_parsers.add_parser(
         "zk_cli", help="""This command will launch a zookeeper cli pointing to the
@@ -767,13 +861,17 @@ def initialize_admin_subcommand(subparsers):
             java.security.auth.login.config conf"""
     )
 
+    add_common_options(zk_cli_parser)
+
     creds_parser = sub_sub_parsers.add_parser(
         "creds", help="""Print the credential keys for a topology.""", formatter_class=SortingHelpFormatter
     )
 
     creds_parser.add_argument("topology_id")
+    add_common_options(creds_parser)
 
     sub_parser.set_defaults(func=admin)
+    add_common_options(sub_parser)
 
 
 def initialize_shell_subcommand(subparsers):
@@ -788,6 +886,7 @@ def initialize_shell_subcommand(subparsers):
     sub_parser.add_argument("args", nargs='*', default=[])
 
     sub_parser.set_defaults(func=shell)
+    add_common_options(sub_parser)
 
 
 def initialize_repl_subcommand(subparsers):
@@ -798,6 +897,7 @@ def initialize_repl_subcommand(subparsers):
     sub_parser = subparsers.add_parser("repl", help=command_help, formatter_class=SortingHelpFormatter)
 
     sub_parser.set_defaults(func=repl)
+    add_common_options(sub_parser)
 
 
 def initialize_nimbus_subcommand(subparsers):
@@ -806,10 +906,11 @@ def initialize_nimbus_subcommand(subparsers):
     supervision with a tool like daemontools or monit.
 
     See Setting up a Storm cluster for more information.
-    (http://storm.apache.org/documentation/Setting-up-a-Storm-cluster
+    (https://storm.apache.org/documentation/Setting-up-a-Storm-cluster)
     """
     sub_parser = subparsers.add_parser("nimbus", help=command_help, formatter_class=SortingHelpFormatter)
     sub_parser.set_defaults(func=nimbus)
+    add_common_options(sub_parser)
 
 
 def initialize_pacemaker_subcommand(subparsers):
@@ -818,10 +919,11 @@ def initialize_pacemaker_subcommand(subparsers):
     supervision with a tool like daemontools or monit.
 
     See Setting up a Storm cluster for more information.
-    (http://storm.apache.org/documentation/Setting-up-a-Storm-cluster)
+    (https://storm.apache.org/documentation/Setting-up-a-Storm-cluster)
     """
     sub_parser = subparsers.add_parser("pacemaker", help=command_help, formatter_class=SortingHelpFormatter)
     sub_parser.set_defaults(func=pacemaker)
+    add_common_options(sub_parser)
 
 
 def initialize_supervisor_subcommand(subparsers):
@@ -830,10 +932,11 @@ def initialize_supervisor_subcommand(subparsers):
     under supervision with a tool like daemontools or monit.
 
     See Setting up a Storm cluster for more information.
-    (http://storm.apache.org/documentation/Setting-up-a-Storm-cluster)
+    (https://storm.apache.org/documentation/Setting-up-a-Storm-cluster)
     """
     sub_parser = subparsers.add_parser("supervisor", help=command_help, formatter_class=SortingHelpFormatter)
     sub_parser.set_defaults(func=supervisor)
+    add_common_options(sub_parser)
 
 def initialize_ui_subcommand(subparsers):
     command_help = """
@@ -842,10 +945,11 @@ def initialize_ui_subcommand(subparsers):
     should be run under supervision with a tool like daemontools or monit.
 
     See Setting up a Storm cluster for more information.
-    (http://storm.apache.org/documentation/Setting-up-a-Storm-cluster)
+    (https://storm.apache.org/documentation/Setting-up-a-Storm-cluster)
     """
     sub_parser = subparsers.add_parser("ui", help=command_help, formatter_class=SortingHelpFormatter)
     sub_parser.set_defaults(func=ui)
+    add_common_options(sub_parser)
 
 
 def initialize_logviewer_subcommand(subparsers):
@@ -855,10 +959,11 @@ def initialize_logviewer_subcommand(subparsers):
     tool like daemontools or monit.
 
     See Setting up a Storm cluster for more information.
-    (http://storm.apache.org/documentation/Setting-up-a-Storm-cluster)
+    (https://storm.apache.org/documentation/Setting-up-a-Storm-cluster)
     """
     sub_parser = subparsers.add_parser("logviewer", help=command_help, formatter_class=SortingHelpFormatter)
     sub_parser.set_defaults(func=logviewer)
+    add_common_options(sub_parser)
 
 
 def initialize_drpc_client_subcommand(subparsers):
@@ -869,13 +974,14 @@ def initialize_drpc_client_subcommand(subparsers):
     sub_parser = subparsers.add_parser("drpc-client", help=command_help, formatter_class=SortingHelpFormatter)
 
     sub_parser.add_argument(
-        "-f", "--function", default=None, help="""If a -f argument is supplied to set the function name all of the arguments are treated
+        "-f", "--function", default=None, help="""If the -f argument is supplied to set the function name all of the arguments are treated
     as arguments to the function.  If no function is given the arguments must
     be pairs of function argument."""
     )
     sub_parser.add_argument("function_arguments", nargs='*', default=[])
 
     sub_parser.set_defaults(func=drpc_client)
+    add_common_options(sub_parser)
 
 
 def initialize_drpc_subcommand(subparsers):
@@ -884,10 +990,11 @@ def initialize_drpc_subcommand(subparsers):
     with a tool like daemontools or monit.
 
     See Distributed RPC for more information.
-    (http://storm.apache.org/documentation/Distributed-RPC)
+    (https://storm.apache.org/documentation/Distributed-RPC)
     """
     sub_parser = subparsers.add_parser("drpc", help=command_help, formatter_class=SortingHelpFormatter)
     sub_parser.set_defaults(func=drpc)
+    add_common_options(sub_parser)
 
 
 def initialize_dev_zookeeper_subcommand(subparsers):
@@ -898,24 +1005,28 @@ def initialize_dev_zookeeper_subcommand(subparsers):
     """
     sub_parser = subparsers.add_parser("dev-zookeeper", help=command_help, formatter_class=SortingHelpFormatter)
     sub_parser.set_defaults(func=dev_zookeeper)
+    add_common_options(sub_parser)
 
 
 def initialize_version_subcommand(subparsers):
     command_help = """Prints the version number of this Storm release."""
     sub_parser = subparsers.add_parser("version", help=command_help, formatter_class=SortingHelpFormatter)
     sub_parser.set_defaults(func=version)
+    add_common_options(sub_parser)
 
 
 def initialize_classpath_subcommand(subparsers):
     command_help = """Prints the classpath used by the storm client when running commands."""
     sub_parser = subparsers.add_parser("classpath", help=command_help, formatter_class=SortingHelpFormatter)
     sub_parser.set_defaults(func=print_classpath)
+    add_common_options(sub_parser)
 
 
 def initialize_server_classpath_subcommand(subparsers):
     command_help = """Prints the classpath used by the storm servers when running commands."""
     sub_parser = subparsers.add_parser("server_classpath", help=command_help, formatter_class=SortingHelpFormatter)
     sub_parser.set_defaults(func=print_server_classpath)
+    add_common_options(sub_parser)
 
 
 def initialize_monitor_subcommand(subparsers):
@@ -931,6 +1042,7 @@ def initialize_monitor_subcommand(subparsers):
     sub_parser.add_argument("-s", "--stream", default=None)
     sub_parser.add_argument("-w", "--watch", default=None)
     sub_parser.set_defaults(func=monitor)
+    add_common_options(sub_parser)
 
 
 def jar(args):
@@ -971,7 +1083,7 @@ def sql(args):
     sql_core_jars = get_wildcard_dir(os.path.join(STORM_TOOLS_LIB_DIR, "sql", "core"))
     extra_jars.extend(sql_core_jars)
 
-    if args.topology_name == "--explain":
+    if args.explain:
         sql_args = ["--file", args.sql_file, "--explain"]
     else:
         sql_args = ["--file", args.sql_file, "--topology", args.topology_name]
@@ -1003,6 +1115,8 @@ def upload_credentials(args):
 
 
 def blob(args):
+    if args.update and not args.replication_factor:
+        raise argparse.ArgumentTypeError("Replication factor needed when doing blob update")
     exec_storm_class(
         "org.apache.storm.command.Blobstore",
         args=sys.argv[2:], storm_config_opts=args.storm_config_opts,
@@ -1025,7 +1139,6 @@ def activate(args):
         jvmtype="-client",
         extrajars=[USER_CONF_DIR, STORM_BIN_DIR])
 
-
 def listtopos(args):
     exec_storm_class(
         "org.apache.storm.command.ListTopologies",
@@ -1033,6 +1146,20 @@ def listtopos(args):
         jvmtype="-client",
         extrajars=[USER_CONF_DIR, STORM_BIN_DIR])
 
+def set_log_level(args):
+    for log_level in args.l:
+        try:
+            _, new_value = log_level.split("=")
+            if ":" in new_value:
+                _, timeout = new_value.split(":")
+                int(timeout)
+        except:
+            raise argparse.ArgumentTypeError("Should be in the form[logger name]=[log level][:optional timeout]")
+    exec_storm_class(
+        "org.apache.storm.command.SetLogLevel",
+        args=sys.argv[2:], storm_config_opts=args.storm_config_opts,
+        jvmtype="-client",
+        extrajars=[USER_CONF_DIR, STORM_BIN_DIR])
 
 def deactivate(args):
     exec_storm_class(
@@ -1043,6 +1170,14 @@ def deactivate(args):
 
 
 def rebalance(args):
+    for executor in args.executors:
+        try:
+            _, new_value = executor.split("=")
+            new_value = int(new_value)
+            if new_value < 0:
+                raise argparse.ArgumentTypeError("Executor count should be > 0")
+        except:
+            raise argparse.ArgumentTypeError("Should be in the form component_name:new_executor_count")
     exec_storm_class(
         "org.apache.storm.command.Rebalance",
         args=sys.argv[2:], storm_config_opts=args.storm_config_opts,
@@ -1216,8 +1351,11 @@ def logviewer(args):
 
 def drpc_client(args):
     if not args.function and not (len(args.function_arguments) % 2):
-        main_parser.error(
-            "If no -f is supplied arguments need to be in the form [function arg]. This has {} args".format(len(args.function_arguments))
+        raise argparse.ArgumentTypeError(
+            "If no -f is supplied arguments need to be in the form [function arg]. " +
+            "This has {} args".format(
+                len(args.function_arguments)
+            )
         )
 
     exec_storm_class(
