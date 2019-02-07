@@ -26,6 +26,11 @@
     </parent>
 
     <artifactId>storm-hbase</artifactId>
+    
+    <properties>
+        <!-- Required downgrade by hbase-client 1.4.4 -->
+        <guava.version>16.0.1</guava.version>
+    </properties>
 
     <developers>
         <developer>
@@ -98,6 +103,11 @@
             <groupId>org.mockito</groupId>
             <artifactId>mockito-core</artifactId>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>${guava.version}</version>
         </dependency>
     </dependencies>
     <build>
